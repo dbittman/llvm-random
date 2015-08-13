@@ -1,5 +1,9 @@
 int puts(i: string);
 
+x: int = 2;
+y: int = 3;
+z: int = x + y;
+
 void function(x: string)
 {
 	puts(x);
