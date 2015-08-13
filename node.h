@@ -18,7 +18,7 @@ typedef std::vector<NVariableDeclaration*> VariableList;
 class Node {
 	public:
 		virtual ~Node() {}
-		virtual llvm::Value* codeGen(CodeGenContext& context) { }
+		virtual llvm::Value* codeGen(CodeGenContext& context) { (void)context; return NULL; }
 };
 
 class NExpression : public Node {
@@ -80,9 +80,9 @@ class NInteger : public NExpression {
 
 class NBinaryOperator : public NExpression {
 	public:
-		int op;
 		NExpression& lhs;
 		NExpression& rhs;
+		int op;
 		NBinaryOperator(NExpression& lhs, int op, NExpression& rhs) :
 		    lhs(lhs), rhs(rhs), op(op) { }
 		virtual llvm::Value* codeGen(CodeGenContext& context);

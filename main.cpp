@@ -7,6 +7,8 @@ NBlock *ast_root;
 extern int yy_flex_debug, yydebug;
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
 	/* yy_flex_debug = 1; */
 	/* yydebug = 1; */
 	yyparse();

@@ -49,6 +49,7 @@ static Type *typeOf(const NIdentifier& type)
 
 Value* NInteger::codeGen(CodeGenContext& context)
 {
+	(void)context;
 	std::cerr << "Creating integer: " << value << std::endl;
 	return ConstantInt::get(Type::getInt64Ty(getGlobalContext()), value, true);
 }
@@ -57,7 +58,6 @@ Value* NString::codeGen(CodeGenContext& context)
 {
 	std::cerr << "Creating string: " << value << std::endl;
 	return IRBuilder<> (context.currentBlock()).CreateGlobalStringPtr(value);
-	return ConstantDataArray::getString(getGlobalContext(), value);
 }
 
 Value* NBinaryOperator::codeGen(CodeGenContext& context)
@@ -69,14 +69,15 @@ Value* NBinaryOperator::codeGen(CodeGenContext& context)
 		//case TMINUS: 	instr = Instruction::Sub; goto math;
 		//case TMUL: 		instr = Instruction::Mul; goto math;
 		//case TDIV: 		instr = Instruction::SDiv; goto math;
-				
 		/* TODO comparison */
 	}
 
 	return NULL;
 math:
-	return BinaryOperator::Create(instr, lhs.codeGen(context), 
-		rhs.codeGen(context), "", context.currentBlock());
+	return BinaryOperator::Create(instr,
+			new LoadInst(lhs.codeGen(context), "", false, context.currentBlock()),
+			new LoadInst(rhs.codeGen(context), "", false, context.currentBlock()),
+		"", context.currentBlock());
 }
 
 Value* NBlock::codeGen(CodeGenContext& context)
@@ -144,7 +145,8 @@ Value* NIdentifier::codeGen(CodeGenContext& context)
 		std::cerr << "undeclared variable " << name << std::endl;
 		return NULL;
 	}
-	return new LoadInst(context.locals()[name], "", false, context.currentBlock());
+	return context.locals()[name];
+	//return (new LoadInst(context.locals()[name], "", false, context.currentBlock()))->getPointerOperand();
 }
 
 Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
