@@ -31,10 +31,10 @@ extern NBlock *ast_root;
 %verbose
 
 %token <token> '+' 
-%token <string> TOK_DECIMAL_CONSTANT TOK_IDENT TOK_STRING_CONSTANT
+%token <string> TOK_DECIMAL_CONSTANT TOK_IDENT TOK_STRING_CONSTANT TOK_ARROW_RIGHT
 
 %type <block> program stmts block
-%type <expr> expr constant
+%type <expr> expr constant lambda
 %type <ident> ident
 %type <stmt> stmt vardecl func_decl func_prot
 %type <exprvec> call_args
@@ -64,7 +64,7 @@ vardecl: ident ':' ident '=' expr { $$ = new NVariableDeclaration(*$3, *$1, $5);
 	   ;
 
 expr : expr '+' expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
-	 | constant
+	 | constant | lambda
 	 | ident '(' call_args ')' { $$ = new NMethodCall(*$1, *$3); }
 	 | ident { $<ident>$ = $1; }
 	 ;
@@ -72,6 +72,8 @@ expr : expr '+' expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
 block : '{' stmts '}' { $$ = $2; }
 	  | '{' '}' { $$ = new NBlock(); }
 	  ;
+
+lambda: '|' func_decl_args '|' TOK_ARROW_RIGHT ident block { $$ = new NLambda(*$5, *new NIdentifier("lambda"), *$2, *$6); }
 
 func_decl : ident ident '(' func_decl_args ')' block 
             { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }

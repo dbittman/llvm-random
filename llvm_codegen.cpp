@@ -75,8 +75,8 @@ Value* NBinaryOperator::codeGen(CodeGenContext& context)
 	return NULL;
 math:
 	return BinaryOperator::Create(instr,
-			new LoadInst(lhs.codeGen(context), "", false, context.currentBlock()),
-			new LoadInst(rhs.codeGen(context), "", false, context.currentBlock()),
+			lhs.codeGen(context),
+			rhs.codeGen(context),
 		"", context.currentBlock());
 }
 
@@ -147,6 +147,37 @@ Value* NIdentifier::codeGen(CodeGenContext& context)
 	}
 	return context.locals()[name];
 	//return (new LoadInst(context.locals()[name], "", false, context.currentBlock()))->getPointerOperand();
+}
+
+Value* NLambda::codeGen(CodeGenContext& context)
+{
+	vector<Type*> argTypes;
+	VariableList::const_iterator it;
+	std::cerr << "Creating lambda: " << id.name << std::endl;
+	for (it = arguments.begin(); it != arguments.end(); it++) {
+		argTypes.push_back(typeOf((**it).type));
+	}
+	FunctionType *ftype = FunctionType::get(typeOf(type), argTypes, false);
+	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.name.c_str(), context.module);
+	BasicBlock *bblock = BasicBlock::Create(getGlobalContext(), "entry", function, 0);
+
+	context.pushBlock(bblock);
+
+	Function::arg_iterator ait;
+	int idx=0;
+	for(ait = function->arg_begin(); ait != function->arg_end(); ait++) {
+		Value *v = ait;
+		auto arg = arguments[idx++];
+		//AllocaInst *alloc = new AllocaInst(typeOf(arg->type), arg->id.name.c_str(), context.currentBlock());
+		context.locals()[arg->id.name] = v;
+		v->setName(arg->id.name);
+	}
+	
+	block.codeGen(context);
+	ReturnInst::Create(getGlobalContext(), bblock);
+
+	context.popBlock();
+	return function;
 }
 
 Value* NFunctionDeclaration::codeGen(CodeGenContext& context)

@@ -27,7 +27,7 @@ STRING \"[^\"]+\"
 [\t\n ]+ { IGNORE(whitespace); }
 
 "+" { return TOKEN('+'); }
-"|" { return TOKEN('-'); }
+"|" { return TOKEN('|'); }
 "," { return TOKEN(','); }
 "." { return TOKEN('.'); }
 "=" { return TOKEN('='); }
@@ -47,6 +47,7 @@ STRING \"[^\"]+\"
 "~" { return TOKEN('~'); }
 ";" { return TOKEN(';'); }
 ":" { return TOKEN(':'); }
+"->" { return TOKEN(TOK_ARROW_RIGHT); }
 
 {DECIMAL_NUMBER} { SAVE_TOKEN; return TOK_DECIMAL_CONSTANT; }
 {IDENT} { SAVE_TOKEN; return TOK_IDENT; }

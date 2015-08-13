@@ -1,13 +1,5 @@
 int puts(i: string);
+puts("Hello World");
 
-x: int = 2;
-y: int = 3;
-z: int = x + y;
-
-void function(x: string)
-{
-	puts(x);
-}
-
-function("Hello World");
+|x: int, y: string| -> int { 3+4; };
 
