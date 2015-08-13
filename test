@@ -1,0 +1,9 @@
+int puts(i: string);
+
+void function(x: string)
+{
+	puts(x);
+}
+
+function("Hello World");
+
