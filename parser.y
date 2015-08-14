@@ -2,7 +2,7 @@
 #include <string>
 #include "node.h"
 #include "lexing.h"
-
+#include <boost/lexical_cast.hpp>
 void yyerror(const char *message)
 {
 	fprintf(stderr, "parse error: %s\n", message);
@@ -13,7 +13,6 @@ extern NBlock *ast_root;
 %}
 
 %union {
-	std::string *string;
 	NExpression *expr;
 	NBlock *block;
 	NStatement *stmt;
@@ -21,7 +20,7 @@ extern NBlock *ast_root;
 	std::vector<NExpression*> *exprvec;
 	std::vector<NVariableDeclaration*> *varvec;
 	NVariableDeclaration *vardecl;
-	int token;
+	Node *node;
 }
 
 %debug
@@ -30,8 +29,7 @@ extern NBlock *ast_root;
 %token-table
 %verbose
 
-%token <token> '+' 
-%token <string> TOK_DECIMAL_CONSTANT TOK_IDENT TOK_STRING_CONSTANT TOK_ARROW_RIGHT
+%token <node> '+' TOK_DECIMAL_CONSTANT TOK_IDENT TOK_STRING_CONSTANT TOK_ARROW_RIGHT
 
 %type <block> program stmts block
 %type <expr> expr constant lambda
@@ -63,7 +61,7 @@ vardecl: ident ':' ident '=' expr { $$ = new NVariableDeclaration(*$3, *$1, $5);
 	   | ident ':' ident { $$ = new NVariableDeclaration(*$3, *$1); }
 	   ;
 
-expr : expr '+' expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
+expr : expr '+' expr { $$ = new NBinaryOperator(*$1, $2->token, *$3); }
 	 | constant | lambda
 	 | ident '(' call_args ')' { $$ = new NMethodCall(*$1, *$3); }
 	 | ident { $<ident>$ = $1; }
@@ -73,7 +71,16 @@ block : '{' stmts '}' { $$ = $2; }
 	  | '{' '}' { $$ = new NBlock(); }
 	  ;
 
-lambda: '|' func_decl_args '|' TOK_ARROW_RIGHT ident block { $$ = new NLambda(*$5, *new NIdentifier("lambda"), *$2, *$6); }
+lambda: '|' func_decl_args '|' TOK_ARROW_RIGHT ident block { 
+	  $$ = new NLambda(
+	  	*$5, 
+	  	*new NIdentifier(
+	  		*$4->file_name
+	  			+ "_" + boost::lexical_cast<std::string>($4->line_number)
+	  			+ "_" + boost::lexical_cast<std::string>($4->character_number)),
+	  		*$2,
+	  		*$6);
+	}
 
 func_decl : ident ident '(' func_decl_args ')' block 
             { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
@@ -88,10 +95,10 @@ func_decl_args : /*blank*/  { $$ = new VariableList(); }
           | func_decl_args ',' vardecl { $1->push_back($<vardecl>3); }
           ;
 
-ident : TOK_IDENT { $$ = new NIdentifier(*$1); }
+ident : TOK_IDENT { $$ = new NIdentifier(*$1->string); }
 
-constant : TOK_DECIMAL_CONSTANT  { $$ = new NInteger(atol($1->c_str())); delete $1; }
-         | TOK_STRING_CONSTANT  { $$ = new NString(*$1); }
+constant : TOK_DECIMAL_CONSTANT  { $$ = new NInteger(atol($1->string->c_str())); delete $1; }
+         | TOK_STRING_CONSTANT  { $$ = new NString(*$1->string); }
 
 %%
 

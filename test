@@ -1,5 +1,5 @@
 int puts(i: string);
 puts("Hello World");
 
-|x: int, y: string| -> int { 3+4; };
+func: lambda = |x: int, y: string| -> int { 3+4; };
 

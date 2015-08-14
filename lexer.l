@@ -4,11 +4,24 @@
 #include "yyparse.h"
 #include "lexing.h"
 
-#define YY_USER_ACTION  { /* scanner_useraction (); */ }
+int lexer_character_number = 0;
+int lexer_line_number = 0;
+std::string *lexer_file_name = new std::string("stdin");
+
+void save_token(Node *node)
+{
+	node->string = new std::string(yytext, yyleng);
+	node->character_number = lexer_character_number;
+	node->line_number = lexer_line_number;
+	node->file_name = lexer_file_name;
+}
+
+#define YY_USER_ACTION  { lexer_character_number += yyleng; yylval.node = new Node(); save_token(yylval.node); }
 #define IGNORE(THING)   { }
 
-#define SAVE_TOKEN yylval.string = new std::string(yytext, yyleng)
-#define TOKEN(x) yylval.token = x
+#define SAVE_TOKEN
+
+#define TOKEN(x) yylval.node->token = x
 %}
 
 %option 8bit
@@ -24,7 +37,8 @@ IDENT [a-zA-Z_][a-zA-Z0-9_]*
 STRING \"[^\"]+\"
 %%
 
-[\t\n ]+ { IGNORE(whitespace); }
+[\t ]+ { IGNORE(whitespace); }
+\n { lexer_line_number++; lexer_character_number = 0; }
 
 "+" { return TOKEN('+'); }
 "|" { return TOKEN('|'); }
@@ -51,7 +65,7 @@ STRING \"[^\"]+\"
 
 {DECIMAL_NUMBER} { SAVE_TOKEN; return TOK_DECIMAL_CONSTANT; }
 {IDENT} { SAVE_TOKEN; return TOK_IDENT; }
-{STRING} { yylval.string = new std::string(yytext+1, yyleng-2); return TOK_STRING_CONSTANT; }
+{STRING} { yylval.node->string = new std::string(yytext+1, yyleng-2); return TOK_STRING_CONSTANT; }
 . { return 0; }
 
 %%

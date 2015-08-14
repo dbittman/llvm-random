@@ -1,8 +1,8 @@
 CXX=g++
 LDFLAGS=$(shell llvm-config --libs core native --cxxflags --ldflags)
-CFLAGS=-std=gnu++11 -g -Wall -Wextra
+CFLAGS=-std=gnu++14 -g -Wall -Wextra
 
-OBJS=main.o parsing.o lexing.o _parser.o _lexer.o llvm_codegen.o
+OBJS=_parser.o _lexer.o main.o parsing.o lexing.o node.o llvm_codegen.o
 PROG=comp
 
 .PHONY: all
