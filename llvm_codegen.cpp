@@ -31,9 +31,9 @@ void CodeGenContext::generateCode(Node& root)
 }
 
 /* Returns an LLVM type based on the identifier */
-static Type *typeOf(const NIdentifier& type) 
+static Type *typeOf(const NType& type) 
 {
-	if (type.name.compare("int") == 0) {
+/*	if (type.name.compare("int") == 0) {
 		return Type::getInt64Ty(getGlobalContext());
 	}
 	else if (type.name.compare("double") == 0) {
@@ -42,7 +42,7 @@ static Type *typeOf(const NIdentifier& type)
 	else if (type.name.compare("string") == 0) {
 		return Type::getInt8Ty(getGlobalContext())->getPointerTo();
 	}
-	return Type::getVoidTy(getGlobalContext());
+	return Type::getVoidTy(getGlobalContext());*/
 }
 
 /* -- Code Generation -- */
@@ -120,9 +120,18 @@ Value* NMethodCall::codeGen(CodeGenContext& context)
 	return call;
 }
 
+Value* NTuple::codeGen(CodeGenContext& context)
+{
+
+}
+
+Value* NType::codeGen(CodeGenContext& context)
+{
+
+}
+
 Value* NVariableDeclaration::codeGen(CodeGenContext& context)
 {
-	std::cerr << "Creating variable declaration " << this << " " << type.name << " " << id.name << std::endl;
 	AllocaInst *alloc = new AllocaInst(typeOf(type), id.name.c_str(), context.currentBlock());
 	context.locals()[id.name] = alloc;
 	if (assignmentExpr != NULL) {
@@ -154,9 +163,9 @@ Value* NLambda::codeGen(CodeGenContext& context)
 	vector<Type*> argTypes;
 	VariableList::const_iterator it;
 	std::cerr << "Creating lambda: " << id.name << std::endl;
-	for (it = arguments.begin(); it != arguments.end(); it++) {
-		argTypes.push_back(typeOf((**it).type));
-	}
+	//for (it = arguments.begin(); it != arguments.end(); it++) {
+	//	argTypes.push_back(typeOf((**it).type));
+	//}
 	FunctionType *ftype = FunctionType::get(typeOf(type), argTypes, false);
 	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.name.c_str(), context.module);
 	BasicBlock *bblock = BasicBlock::Create(getGlobalContext(), "entry", function, 0);
@@ -167,13 +176,13 @@ Value* NLambda::codeGen(CodeGenContext& context)
 	int idx=0;
 	for(ait = function->arg_begin(); ait != function->arg_end(); ait++) {
 		Value *v = ait;
-		auto arg = arguments[idx++];
+		//auto arg = arguments[idx++];
 		//AllocaInst *alloc = new AllocaInst(typeOf(arg->type), arg->id.name.c_str(), context.currentBlock());
-		context.locals()[arg->id.name] = v;
-		v->setName(arg->id.name);
+		//context.locals()[arg->id.name] = v;
+		//v->setName(arg->id.name);
 	}
 	
-	block.codeGen(context);
+	block->codeGen(context);
 	ReturnInst::Create(getGlobalContext(), bblock);
 
 	context.popBlock();

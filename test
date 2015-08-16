@@ -1,5 +1,12 @@
-int puts(i: string);
-puts("Hello World");
+puts: (%string) -> %int;
 
-func: lambda = |x: int, y: string| -> int { 3+4; };
+func: (%int, %string) -> %int = (x: %int, y: %string) -> %int { return 3 - x; };
+
+quicksort = (list: [%int]) -> [%int] {
+	lista = filter ( (x: %int) -> %int { return x == 1; }, list );
+};
+
+arr: [%int] = test[3];
+
+quicksort(arr);
 

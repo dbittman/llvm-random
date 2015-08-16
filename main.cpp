@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	std::cerr << *ast_dump;
 	std::cerr << std::endl;
 
-	CodeGenContext context;
-	context.generateCode(*ast_root);
+	//CodeGenContext context;
+	//context.generateCode(*ast_root);
 }
 
