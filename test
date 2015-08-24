@@ -1,12 +1,22 @@
 puts: (%string) -> %int;
 
-func: (%int, %string) -> %int = (x: %int, y: %string) -> %int { return 3 - x; };
-
-quicksort = (list: [%int]) -> [%int] {
-	lista = filter ( (x: %int) -> %int { return x == 1; }, list );
+func = (x: %int, y: %string) -> (%int, %string) { 
+	return (3 - x, y);
 };
 
-arr: [%int] = test[3];
+test: [%int] = [2,3,4,5];
+arr: %int = test[3];
+ta: [%type] = [%int, %string];
 
-quicksort(arr);
+filter: ([%T]) -> [%T];
+concat: ([%T]) -> [%T];
 
+quicksort = (list: [%T]) -> [%T] {
+	pivot: %T = list[0];
+	newlist = list + 1;
+	lista: [%T] = filter(newlist, (item: %T) -> %bool { return item >= pivot; });
+	listb: [%T] = filter(newlist, (item: %T) -> %bool { return item < pivot; });
+	return concat(concat(quicksort(lista), [pivot]), quicksort(listb));
+};
+
+t: ([%T], (%P)) = NULL;

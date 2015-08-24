@@ -32,7 +32,7 @@ void save_token(Node *node)
 %option verbose
 %option warn
 
-DECIMAL_NUMBER ([1-9])([0-9])*
+DECIMAL_NUMBER ([0-9])([0-9])*
 IDENT [a-zA-Z_][a-zA-Z0-9_]*
 STRING \"[^\"]+\"
 TYPE %{IDENT}

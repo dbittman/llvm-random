@@ -34,7 +34,7 @@ extern NBlock *ast_root;
 %token <node> '+' TOK_DECIMAL_CONSTANT TOK_IDENT TOK_STRING_CONSTANT TOK_ARROW_RIGHT TOK_TYPENAME TOK_RETURN '-' '/' '*' '&' '|' TOK_DOUBLE_EQ TOK_GEQ TOK_LEQ '>' '<' TOK_NEQ
 
 %type <block> program stmts block
-%type <expr> expr constant lambda tuple vardecl
+%type <expr> expr constant lambda tuple vardecl array
 %type <typeexpr> type tuple_type lambda_type array_type
 %type <typevec> tuple_type_list
 %type <ident> ident
@@ -70,6 +70,7 @@ expr : constant | lambda
 	 | ident { $<ident>$ = $1; }
 	 | vardecl
 	 | tuple
+	 | type { $$ = (NExpression *)$1; }
 	 | expr '[' expr ']' { $$ = new NArrayIndex(*$1, *$3); }
 	 | expr '=' expr { $$ = new NAssignment(*$1, *$3); }
 	 | expr '+' expr { $$ = new NBinaryOperator(*$1, $2->token, *$3); }
@@ -85,7 +86,12 @@ expr : constant | lambda
 	 | expr '>' expr { $$ = new NBinaryOperator(*$1, $2->token, *$3); }
 	 | expr '<' expr { $$ = new NBinaryOperator(*$1, $2->token, *$3); }
 	 | '-' expr { $$ = new NUnaryOperator($1->token, *$2); }
+	 | array
 	 ;
+
+array : '[' tuple_elems ']' {
+	$$ = new NArray($2);
+}
 
 tuple : '(' tuple_elems ')' {
 	NTypeTuple *type = new NTypeTuple(new TypeList());

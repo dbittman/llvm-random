@@ -100,6 +100,16 @@ std::string *NTuple::to_string(int whitespace)
 	return ret;
 }
 
+std::string *NArray::to_string(int whitespace)
+{
+	std::string *ret = new std::string(whitespace, ' ');
+	*ret += "(Array)";
+	for(ExpressionList::iterator it = expressions->begin(); it != expressions->end(); it++) {
+		*ret += "\n" + *(**it).to_string(whitespace + 4);
+	}
+	return ret;
+}
+
 std::string *NLambda::to_string(int whitespace)
 {
 	std::string *ret = new std::string(whitespace, ' ');

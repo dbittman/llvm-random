@@ -37,7 +37,12 @@ class Node {
 		//virtual llvm::Value* codeGen(CodeGenContext& context) { (void)context; return NULL; }
 };
 
-class NTypeExpression : public Node {};
+class NExpression : public Node {
+	public:
+		NTypeExpression *result_type = NULL;
+};
+
+class NTypeExpression : public NExpression {};
 
 class NType : public NTypeExpression {
 	public:
@@ -46,17 +51,14 @@ class NType : public NTypeExpression {
 		virtual std::string *to_string(int whitespace = 0);
 };
 
-class NExpression : public Node {
-	public:
-		NTypeExpression *result_type = NULL;
-};
-
 class NStatement : public Node {};
 
-
-/*class NType : public NTypeExpression {
-
-};*/
+class NArray : public NExpression {
+	public:
+		ExpressionList *expressions;
+		NArray(ExpressionList *expressions) : expressions(expressions) {}
+		virtual std::string *to_string(int whitespace = 0);
+};
 
 class NBlock : public NExpression {
 	public:
@@ -95,16 +97,6 @@ class NTuple : public NExpression {
 		NTuple(NTypeTuple &type) : type(type){};
 		virtual std::string *to_string(int whitespace = 0);
 };
-
-/*
-class NPointer : public NExpression {
-
-};
-
-class NTypePointer: public NTypeExpression {
-
-};
-*/
 
 class NExpressionStatement : public NStatement {
 	public:
@@ -216,127 +208,5 @@ class NMethodCall : public NExpression {
 	//	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
-#if 0
-
-class NTuple : public NExpression {
-	public:
-		ExpressionList& expressions;
-		NTuple(ExpressionList& expressions) : expressions(expressions) {}
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NType : public NExpression {
-	public:
-		NExpression& type;
-		NType(NExpression& type) : type(type) {}
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NIdentifier : public NExpression {
-	public:
-		std::string name;
-		NIdentifier(const std::string& name) : name(name) { }
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NBlock : public NExpression {
-	public:
-		StatementList statements;
-		NBlock() { }
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NLambda : public NExpression {
-	public:
-		NExpression& type;
-		NIdentifier& id;
-		NTuple& arguments;
-		NBlock *block;
-		NLambda(NTuple& arguments, NIdentifier& id, 
-		        NExpression& type) :
-		    type(type), id(id), arguments(arguments) { block = NULL; }
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NFunctionDeclaration : public NStatement {
-	public:
-		NIdentifier& type;
-		NIdentifier& id;
-		VariableList arguments;
-		NBlock& block;
-		NFunctionDeclaration(NIdentifier& type, NIdentifier& id, 
-		        const VariableList& arguments, NBlock& block) :
-		    type(type), id(id), arguments(arguments), block(block) { }
-		//virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NFunctionPrototype : public NStatement {
-	public:
-		NIdentifier& type;
-		NIdentifier& id;
-		VariableList arguments;
-		NFunctionPrototype(NIdentifier& type, NIdentifier& id, 
-		        const VariableList& arguments) :
-		    type(type), id(id), arguments(arguments) { }
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NString : public NExpression {
-	public:
-		std::string value;
-		NString(std::string& value) : value(value) { }
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-class NInteger : public NExpression {
-	public:
-		long long value;
-		NInteger(long long value) : value(value) { }
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-
-class NExpressionStatement : public NStatement {
-	public:
-		NExpression& expression;
-		NExpressionStatement(NExpression& expression) : 
-		    expression(expression) { }
-		virtual std::string *to_string(int whitespace = 0);
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-};
-
-class NAssignment : public NExpression {
-	public:
-		NIdentifier& lhs;
-		NExpression& rhs;
-		NAssignment(NIdentifier& lhs, NExpression& rhs) : 
-		    lhs(lhs), rhs(rhs) { }
-		virtual std::string *to_string(int whitespace = 0);
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-};
-
-class NVariableDeclaration : public NExpression {
-	public:
-		NExpression& type;
-		NIdentifier& id;
-		NExpression *assignmentExpr;
-		NVariableDeclaration(NExpression& type, NIdentifier& id) :
-		    type(type), id(id) { }
-		NVariableDeclaration(NExpression& type, NIdentifier& id, NExpression *assignmentExpr) :
-		    type(type), id(id), assignmentExpr(assignmentExpr) { }
-	//	virtual llvm::Value* codeGen(CodeGenContext& context);
-		virtual std::string *to_string(int whitespace = 0);
-};
-
-#endif
 #endif
 
